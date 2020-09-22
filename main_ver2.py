@@ -35,7 +35,8 @@ class PotData:
         self.nowData['ph'] = sensing.getPh()
         self.nowData['temp'] = sensing.getTemp()
         self.nowData['hum'] = sensing.getHum()
-
+        data = "%d temp, %d hum, %d lux" %(sensing.getTemp(), sensing.getHum(), sensing.getLux())
+        f.write(data)
         f.close()
 
 
