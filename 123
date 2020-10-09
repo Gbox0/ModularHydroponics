@@ -1,0 +1,13 @@
+    def getType(self, address):
+        self.module_type = self.address
+
+        for i in address:
+            self.module_type = i
+            type_send = bus.read_byte(address[i])
+
+            if type_send == 1 :
+                self.module_type[i] = 'sensing'
+            if type_send== 2 :
+                self.module_type[i] = 'actuating'
+
+        return self.module_type
