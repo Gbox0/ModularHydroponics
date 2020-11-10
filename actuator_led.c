@@ -2,21 +2,21 @@
 #define SLAVE_ADDRESS 0x06
 #define LED A2
 
-int stage = 0;
-int x = 0;
+byte z = 10;
+int state = 0;
 int instr_number;
 void setup(void) {
   pinMode(LED, OUTPUT);
-  Serial.begin(9600);
+  digitalWrite(LED,LOW);
+  analogWrite(A7, 255);
+  analogWrite(A7, 0);
   Wire.begin(SLAVE_ADDRESS);
-  Serial.println("I2C Ready!");
-  Serial.println("LED experiment!");
-  Wire.onReceive(receiveData);
+  Wire.onReceive(instrNum);
 }
   
 void loop(){
 }
-void receiveData(int byteCount){
+void instrNum(int byteCount){
   while(Wire.available()) {
     instr_number = Wire.read();
     Serial.print("data received: ");
@@ -24,61 +24,34 @@ void receiveData(int byteCount){
     if (instr_number == 1){
       sendType();
     }
-    if (instr_number == 2){
+    else if (instr_number == 2){
       on();
-      Serial.println("불이 켜집니다");
     }
 
     else if (instr_number == 3){
       off();
-      Serial.println("불이 꺼집니다.");
     }
-    else{
-      Stage();
+    else if (instr_number == 4){
+      Wire.onRequest(State);
     }
   }
 }
 void sendType() {
   int type = 2;
-  Wire.write((int)type);
+  Wire.write(type);
 }
 void on() {
   digitalWrite(LED, HIGH);
+  state = 1;
   Serial.println("on");
+  return state;
 }
 void off(){
   digitalWrite(LED, LOW);
+  state = 0; 
   Serial.println("off");
+  return state;
 }
-void Stage(){
-  if (instr_number == 0){
-    stage = stage/10;
-    Serial.println(stage);
-    if (stage == 0){
-      Serial.println("작동안함");
-    }
-    else if(stage == 1){
-      Serial.println("작동안함");
-    }
-    else if(stage>=1){
-      x = x+50;
-      if (255<x){
-      x = 255;
-    }
-    Serial.println("상승");
-    analogWrite(LED, x);
-    }
-    else{
-    x = x-50;
-    if (x<0){
-      x = 0;
-    }
-    Serial.println("하강");
-    analogWrite(LED, x);
-    }
-     stage = 0;
-  }
-  else{
-   stage = 0-stage - instr_number;
-  }
+void State(){
+  Wire.write((int)state);
 }
